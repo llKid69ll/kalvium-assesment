@@ -1,0 +1,8 @@
+[
+  {"text": "AAAAAAAAB", "pattern": "AAAAB", "lps": [0, 1, 2, 3, 0], "matches": [4]},
+  {"text": "ABABABCABABX", "pattern": "ABABX", "lps": [0, 0, 1, 2, 0], "matches": [7]},
+  {"text": "ABCDEF", "pattern": "XYZ", "lps": [0, 0, 0], "matches": []},
+  {"text": "AAAAA", "pattern": "AAA", "lps": [0, 1, 2], "matches": [0, 1, 2]},
+  {"text": "ABCD", "pattern": "ABCD", "lps": [0, 0, 0, 0], "matches": [0]},
+  {"text": "ABABAB", "pattern": "ABAB", "lps": [0, 0, 1, 2], "matches": [0, 2]}
+]

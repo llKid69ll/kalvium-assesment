@@ -1,0 +1,65 @@
+:root {
+  --bg: #f5f1ea;
+  --bg-strong: #efe3d1;
+  --panel: #fffdf9;
+  --panel-soft: #f8f2e8;
+  --card: #ffffff;
+  --ink: #1f2937;
+  --ink-soft: #4b5563;
+  --muted: #5f6b7a;
+  --line: rgba(31, 41, 55, 0.12);
+  --accent: #8c5b2d;
+  --accent-deep: #6b4521;
+  --accent-soft: rgba(140, 91, 45, 0.12);
+  --success: #275e49;
+  --warning: #b76e1b;
+  --danger: #b3261e;
+  --shadow: rgba(31, 41, 55, 0.08);
+  --focus: #0f5fff;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  font-size: 18px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-strong) 100%);
+  color: var(--ink);
+  font-family: "Segoe UI", Arial, sans-serif;
+  line-height: 1.6;
+}
+
+img, svg { max-width: 100%; display: block; }
+
+a { color: inherit; }
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+h1, h2, h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}

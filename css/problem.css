@@ -1,0 +1,95 @@
+.pb-board {
+  --cell: 2.6rem;
+  display: grid;
+  gap: 1.1rem;
+}
+
+.pb-section {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.pb-caption {
+  color: #4b5563;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.pb-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0.35rem 0.2rem 0.65rem;
+}
+
+.pb-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.3rem;
+  width: max-content;
+}
+
+.pb-cell {
+  display: flex;
+  flex: 0 0 var(--cell);
+  width: var(--cell);
+  height: var(--cell);
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(31, 41, 55, 0.15);
+  border-radius: 0.35rem;
+  background: #fff;
+  color: #263238;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-weight: 700;
+  position: relative;
+}
+
+.pb-index-row .pb-cell {
+  border-color: transparent;
+  background: transparent;
+  color: #5f6b7a;
+  font-size: 0.75rem;
+}
+
+.pb-good {
+  background: #dcefe4;
+}
+
+.pb-ok {
+  background: #3f7a5c;
+  color: #fff;
+}
+
+.pb-bad {
+  background: #b45a45;
+  color: #fff;
+}
+
+.pb-grey {
+  background: #e9e5de;
+  color: #66615b;
+}
+
+.pb-amber {
+  background: #d49a3a;
+  color: #292319;
+}
+
+.pb-slide {
+  transform: translateX(calc(var(--shift) * var(--cell)));
+  transition: transform .35s ease;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid #0f5fff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pb-slide {
+    transition: none;
+  }
+}
