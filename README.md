@@ -1,13 +1,83 @@
-# kalvium-assesment
-Implementation of the given kalvium assesment
-# KMP Explorer: An Interactive 45-Minute Lesson on Knuth-Morris-Pratt
+# KMP Explorer
 
-Learn how KMP finds a pattern in a text without ever re-reading a text character, by watching it run, predicting what it does next, and writing it yourself.
+An interactive, self-paced 45-minute lesson about substring search and the Knuth-Morris-Pratt (KMP) algorithm. Learners compare naive search with KMP, build the LPS table, trace mismatches, and apply the same idea to a new string problem.
 
-**Live demo:** `https://<your-username>.github.io/kmp-explorer/`
-**Explanation video:** `<link>`
-**Delivery format:** Self-learning (an instructor guide is included in `docs/`)
 **Duration:** 45 minutes
+
+## The Problem and the Solution
+
+Substring search looks simple until a partial match fails. A naive search moves the pattern one position and starts comparing from its beginning again, repeating checks it has already made. This is especially wasteful when the text and pattern contain repeated prefixes, such as searching for `AAAAB` in a long run of `A` characters.
+
+KMP records each pattern prefix's longest proper prefix that is also a suffix in an LPS table. On a mismatch, it uses that overlap to move the pattern pointer `j` while leaving the text pointer `i` in place. The text pointer never moves backward, although a text character can be compared again after a fallback.
+
+| Learning problem | What KMP Explorer makes visible |
+|---|---|
+| Naive search repeats work after a partial match | Module 1 steps through each alignment and counts comparisons and re-reads. |
+| LPS is difficult to infer from its definition alone | Module 2 highlights the prefix and suffix as each table entry is built. |
+| A mismatch fallback can feel like a magic jump | Module 3 animates the pattern shift and keeps the text index visible. |
+| Linear complexity is easy to memorize but hard to justify | Module 5 connects pointer movement and fallback counts to the O(n + m) bound. |
+| The algorithm may seem useful only for substring search | Module 6 applies LPS to the shortest repeating unit challenge. |
+
+## System Architecture
+
+The app is a static HTML page. `main.js` mounts the module views; algorithm generators produce step records; the UI renders those records and handles navigation, prediction, and playback.
+
+```mermaid
+flowchart TD
+    Learner[Learner] --> Shell[index.html]
+    Shell --> Main[js/main.js]
+    Main --> Navigation[progress.js]
+    Main --> Views[Lesson UI modules]
+    Views --> Problem[Problem visualizer]
+    Problem --> Naive[naiveSteps generator]
+    Problem --> Board[Problem board renderer]
+    Views --> LPS[LPS visualizer]
+    LPS --> LPSSteps[buildLpsSteps generator]
+    Views --> Match[Match visualizer]
+    Match --> KMPSteps[kmpSearchSteps generator]
+    Views --> Code[Code panel]
+    Code --> LPSSteps
+    Code --> KMPSteps
+    Views --> Complexity[Complexity lab]
+    Complexity --> Search[kmpSearch and naive counts]
+    Views --> Quiz[Quiz and challenge]
+    Quiz --> Content[quiz-data.js]
+    Quiz --> Pyodide[Pyodide loaded on demand]
+    Naive --> Steps[Step records]
+    LPSSteps --> Steps
+    KMPSteps --> Steps
+    Steps --> Views
+```
+
+| Layer | Responsibility | Main files |
+|---|---|---|
+| Lesson shell | Defines the six module containers and progress navigation | `index.html`, `js/main.js`, `js/ui/progress.js` |
+| Algorithm core | Computes LPS/search behavior and emits inspectable steps | `js/core/kmp.js`, `js/core/naive-steps.js`, `js/core/stepper.js` |
+| Module views | Turns input and current algorithm state into tables, boards, counters, and feedback | `js/ui/` |
+| Lesson content | Holds copy, presets, questions, answers, and hints separately from rendering | `js/content/` |
+| Styling | Supplies shared theme/layout styles and Module 1 board/control styles | `css/` |
+| Validation | Checks algorithm behavior against fixed vectors and unit tests | `tests/`, `python/tests/` |
+
+## Learner Workflow
+
+| Stage | Learner action | System response |
+|---|---|---|
+| Start | Opens the lesson and chooses a module from the progress bar | `main.js` mounts the views; navigation displays one module at a time. |
+| Observe | Selects a preset or enters text and pattern | The selected module creates a sequence of algorithm steps from the input. |
+| Predict | Enters an LPS value, next event, or final comparison count | The module checks the prediction and explains the result. |
+| Step through | In a step-driven module, uses Step, Back, Play, or Reset | The view renders the relevant step record; it does not calculate the algorithm independently. |
+| Compare | Runs naive and KMP on the same input or changes the complexity slider | Comparison bars and worst-case curves show measured counts. |
+| Apply | Answers the quiz and edits the repeating-unit Python starter | Feedback is shown immediately; Pyodide runs the hidden challenge tests when requested. |
+
+### Step Data Flow
+
+| Sequence | System operation |
+|---:|---|
+| 1 | A module accepts text and pattern input. |
+| 2 | A core generator yields one object for each comparison, fallback, match, or completion event. |
+| 3 | The module records the yielded objects and tracks the selected step. |
+| 4 | The renderer draws cells, pointers, messages, counters, and highlighted code from that step. |
+| 5 | Back, Step, Play, Reset, or a new prediction changes the selected record and triggers a redraw. |
 
 ---
 
@@ -31,7 +101,7 @@ By the end of the lesson a student can:
 | 0-5 | 1. The Problem | Naive search re-compares characters | Step through brute force on `AAAAB` in `AAAAAAAAB` with a live comparison counter |
 | 5-15 | 2. The LPS Table | Prefix = suffix overlaps | Type any pattern; the table builds one cell at a time with the prefix and suffix highlighted. Predict-then-reveal mode |
 | 15-25 | 3. The Matching Phase | Pointer `i` never moves back; `j` falls back via LPS | Step / play / back over custom text and pattern, with a mismatch-jump animation |
-| 25-32 | 4. The Code | Python implementation | Code panel with the current line highlighted in sync with the animation; editable playground |
+| 25-32 | 4. The Code | Python implementation | Step through the source with the active line highlighted; review common mistakes |
 | 32-37 | 5. Complexity | O(n + m) time, O(m) space | Naive vs KMP comparison counts on the learner's own input, plus the amortized argument |
 | 37-45 | 6. Check Yourself | Assessment | Quiz, "what happens next?" predictions, one coding challenge |
 
@@ -41,10 +111,10 @@ Every module follows the same loop: **see it, predict it, change the input, chec
 
 ## 3. Design decisions
 
-- **Algorithm as a stream of steps.** `kmp.js` is written as generator functions that yield a step object (`{phase, i, j, lpsSnapshot, line, message}`) at each decision point. All steps are recorded into an array, so back and forward are trivial and every visual is a pure function of one step. The UI never re-implements the algorithm.
+- **Algorithm as a stream of steps.** `kmp.js` and `naive-steps.js` expose generators that yield records such as `{phase, i, j, lps, line, event, message}`. Views record these steps and render the selected state; they do not re-implement the search logic.
 - **LPS gets its own module.** Most explanations treat the table as a given. Here it is a full interactive module because it is the hardest part.
 - **Predict before reveal.** Learners commit to an answer (the next LPS value, the next pointer position) before the animation shows it.
-- **Python is the reference.** The lesson shows and runs Python. The visualizer runs a JS port, and a shared test-vector file proves both produce identical results.
+- **Python is the reference.** The code module displays Python; the challenge runs learner-edited Python through Pyodide. JavaScript generators power the visual lesson.
 - **No build step.** Plain HTML, CSS and ES modules. Anyone can clone, open `index.html` through a static server and it works.
 
 ---
@@ -55,13 +125,13 @@ Every module follows the same loop: **see it, predict it, change the input, chec
 |-------|--------|-----|
 | Markup / style | HTML5, CSS (custom properties, grid) | No framework needed; fast load; easy to review |
 | Logic | Vanilla JavaScript (ES modules) | Generators map naturally onto algorithm steps |
-| Visuals | DOM + CSS transitions (SVG for pointer arrows) | Crisp, accessible, no canvas bookkeeping |
+| Visuals | DOM + CSS transitions; SVG for the complexity curve | Crisp, accessible, no canvas bookkeeping |
 | Executable Python | [Pyodide](https://pyodide.org) loaded lazily from CDN | Runs real Python in the browser with no backend |
 | JS tests | Node built-in test runner (`node --test`) | Zero dependencies |
 | Python tests | `unittest` (standard library) | Zero dependencies |
 | Hosting | GitHub Pages via GitHub Actions | Public link for reviewers |
 
-Trade-offs: Pyodide is ~10 MB on first use and needs internet, so the playground loads only when the learner opens it. Everything else works offline.
+Trade-offs: Pyodide is several megabytes on first use and needs internet, so the challenge runtime loads only when the learner runs the tests. The rest of the lesson uses local static assets.
 
 ---
 
@@ -75,24 +145,28 @@ kmp-explorer/
 ├── css/
 │   ├── base.css                # Variables, typography, reset
 │   ├── layout.css              # Page grid, module navigation
-│   └── components.css          # Cells, pointers, buttons, quiz cards
+│   ├── components.css          # Shared controls and module components
+│   └── problem.css             # Module 1 board, forms, and controls
 ├── js/
 │   ├── main.js                 # Bootstraps modules, routing, progress
 │   ├── core/
-│   │   ├── kmp.js              # buildLps() and kmpSearch() as step generators
-│   │   ├── naive.js            # Brute-force search as step generator
+│   │   ├── kmp.js              # LPS builder, LPS/KMP step generators, search wrapper
+│   │   ├── naive.js            # Naive search summary helper
+│   │   ├── naive-steps.js      # Naive search as a step generator
 │   │   └── stepper.js          # Records steps; play/pause/back/forward
 │   ├── ui/
+│   │   ├── problem-visualizer.js # Module 1 naive-search walkthrough
+│   │   ├── problem-board.js    # Pure DOM board renderer
 │   │   ├── lps-visualizer.js   # Module 2
 │   │   ├── match-visualizer.js # Module 3
-│   │   ├── code-panel.js       # Line highlighting synced to steps
+│   │   ├── code-panel.js       # Python source synced to step lines
 │   │   ├── complexity-lab.js   # Module 5 counters and chart
-│   │   ├── playground.js       # Pyodide editor and runner
-│   │   ├── quiz.js             # Module 6 knowledge checks
-│   │   └── progress.js         # Timer and completion tracking
+│   │   ├── quiz.js             # Module 6 quiz and coding challenge
+│   │   └── progress.js         # Module navigation
 │   └── content/
 │       ├── lesson.js           # Explanatory text per module
-│       └── quiz-data.js        # Questions, answers, explanations
+│       ├── problem-copy.js     # Module 1 copy and presets
+│       └── quiz-data.js        # Questions, challenge, answers, and hints
 ├── python/
 │   ├── kmp.py                  # Reference implementation
 │   ├── challenges/
