@@ -89,20 +89,6 @@ function initializeLesson() {
     });
   }
 
-  document.querySelectorAll('.progress-step').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      const stepIndex = Number(tab.dataset.step);
-      document.querySelectorAll('.module-panel').forEach((panel, index) => {
-        const isActive = index === stepIndex;
-        panel.hidden = !isActive;
-        panel.classList.toggle('is-visible', isActive);
-      });
-      document.querySelectorAll('.progress-step').forEach((dot) => {
-        dot.classList.toggle('is-active', Number(dot.dataset.step) === stepIndex);
-      });
-    });
-  });
-
   console.log('KMP Explorer initialized. Demo ready.');
 }
 
